@@ -1,0 +1,151 @@
+#+TITLE: ARGL - Argument Library
+#+AUTHOR: Laluxx
+#+DATE: [2024-03-14]
+#+OPTIONS: toc:2
+
+#+begin_center
+A modern C library for parsing command line arguments with beautiful error messages and type validation.
+#+end_center
+
+* Features
+- 🎨 Beautiful error messages with syntax highlighting
+- 🔒 Type-safe argument parsing
+- 🚀 Easy to use single-header library
+- 📝 Auto-generated help messages
+- ⚡ Zero dependencies
+
+* Installation
+Just copy =argl.h= into your project and include it:
+
+#+begin_src c
+  #include "argl.h"
+#+end_src
+
+Or compile the example main.c in the repo to try it
+#+begin_src bash
+git clone https://github.com/laluxx/argl
+cd argl
+gcc main.c -o example && ./example
+#+end_src>
+
+* Quick Start
+
+#+begin_src c
+  #include "argl.h"
+
+  int main(int argc, char *argv[]) {
+      // Add arguments
+      add_arg("verbose", 'v', "Enable verbose output", ARG_BOOL, false, "false");
+      add_arg("name", 'n', "Your name", ARG_STRING, true, NULL);
+      add_arg("count", 'c', "Number of iterations", ARG_INT, false, "1");
+      add_arg("threshold", 't', "Threshold value", ARG_FLOAT, false, "0.5");
+
+      // Parse arguments
+      if (!parse_args(argc, argv)) {
+          argl_print_help();
+          return 1;
+      }
+
+
+      // Access the values
+      int count        = argl_get_int("count");
+      bool verbose     = argl_get_bool("verbose");
+      float threshold  = argl_get_float("threshold");
+      const char* name = argl_get_string("name");
+
+      // Use the values...
+      return 0;
+  }
+#+end_src
+
+* Usage Examples
+
+** Help Message
+Running with =--help= or =-h= shows a nicely formatted help message:
+#+begin_src bash
+  $ ./example --help
+
+  Options:
+  -v, --verbose
+  Enable verbose output (default: false)
+
+  -n, --name <string>
+  Your name [required]
+
+  -c, --count <integer>
+  Number of iterations (default: 1)
+
+  -t, --threshold <float>
+  Threshold value (default: 0.5)
+#+end_src
+
+** Error Messages
+argl provides a simple type system and detailed error messages with context:
+
+Missing *required* argument:
+#+begin_src bash
+  ❯ ./example       
+  Error: Missing Required Argument
+  × This argument must be provided
+  ╭─[./example]
+  1 │ --name
+  · ╰── here
+  ╰────
+
+  Options:
+  -v, --verbose
+  Enable verbose output (default: false)
+
+  -n, --name <string>
+  Your name [required]
+
+  -c, --count <integer>
+  Number of iterations (default: 1)
+
+  -t, --threshold <float>
+  Threshold value (default: 0.5)
+#+end_src
+
+Invalid *type*:
+#+begin_src bash
+  ❯ ./example -n name -t text     
+  Error: Invalid Value
+  × Expected a floating-point value
+  ╭─[./example -n name -t text]
+  1 │ -t
+  ·    ╰── here
+  ╰────
+#+end_src
+
+* Supported Argument Types
+| Type       | Description           | Example Usage   |
+|------------+-----------------------+-----------------|
+| ARG_BOOL   | Boolean flags         | --verbose       |
+| ARG_STRING | String values         | --name "John"   |
+| ARG_INT    | Integer values        | --count 42      |
+| ARG_FLOAT  | Floating point values | --threshold 0.5 |
+
+* API Reference
+** =add_arg(name, short_name, description, type, required, default_val)=
+Add a new argument to the global parser
+
+** =parse_args(argc, argv)=
+Parse command line arguments
+
+** Getters
+- =argl_get_flag(name)= - Get a flag value
+- =argl_get_string(name)= - Get a string value
+- =argl_get_int(name)= - Get an integer value
+- =argl_get_float(name)= - Get a float value
+
+* Contributing [0/1]
+Pull requests are welcome!
+** TODO Support =
+#+begin_src bash
+--name="skibidisigma"
+--name=skibidisigma
+-n=skibidisigma
+-n="skibidisigma"
+#+end_src>
+** TODO Interactive Completion
+Like modern shells
